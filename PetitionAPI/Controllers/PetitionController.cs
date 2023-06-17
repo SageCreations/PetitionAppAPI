@@ -40,6 +40,14 @@ public class PetitionController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Petition>> PostPetition(Petition petition)
     {
+        Random rnd = new Random();
+        int newId = rnd.Next();
+        while (GetPetition(newId).Result.Value != null)
+        {
+            newId = rnd.Next();
+        }
+        petition.Id = newId;
+      
         petition.EntryDate = DateTime.UtcNow;
         _context.Petitions.Add(petition);
         await _context.SaveChangesAsync();
