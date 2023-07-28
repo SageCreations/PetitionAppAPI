@@ -54,7 +54,31 @@ public class PetitionController : ControllerBase
 
         return CreatedAtAction(nameof(GetPetition), new { id = petition.Id }, petition);
     }
-    
+
+
+    // POST to merge petitions
+    [HttpPost("merge")]
+    public async Task<ActionResult<Petition>> MergePetitions([FromBody] List<Petition> petitions, [FromQuery] string newName)
+    {
+        var mergedDescription = string.Join("\n\n", petitions.Select(p => p.Description));
+
+        var mergedPetition = new Petition
+        {
+            Name = newName,
+            Description = mergedDescription,
+            // ... other properties ...
+        };
+
+        await PostPetition(mergedPetition);
+
+        foreach (var petition in petitions)
+        {
+            await DeletePetition(petition.Id);
+        }
+
+        return Ok(mergedPetition);
+    }
+
     // DELETE by specific Id
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePetition(int id)
@@ -70,4 +94,6 @@ public class PetitionController : ControllerBase
 
         return NoContent();
     }
+    
+    
 }
